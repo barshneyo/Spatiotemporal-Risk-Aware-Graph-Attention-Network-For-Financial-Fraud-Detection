@@ -1,2 +1,2 @@
 # Spatiotemporal-Risk-Aware-Graph-Attention-Network-For-Financial-Fraud-Detection
-Learnable fraud detection model with core implementation using PyTorch DDP
+Learnable fraud detection sparse graph model with 30x30 vector for account-to-account-transfer type transaction weights, and nxn adjacency matrix(n>=10000) with core implementation using autoswitchable modes from PyTorch for lower order adjacency matrices to PyTorch-DDP for higher order adjacency matrices as in the case of fully generalised bank networks
