@@ -1,9 +1,9 @@
 FFD-STRA-GAT: Spatiotemporal Risk-Aware Graph Attention Network for Financial Fraud Detection
 FFD-STRA-GAT is an advanced spatiotemporal attentional framework designed to detect financial fraud in large-scale transaction networks
 . Unlike generic Graph Neural Networks (GNNs) that must learn fraud patterns from scratch, this model integrates domain-informed deviation-driven anomaly scoring with a learnable Graph Attention Network (GAT) extension
-
+.
 This repository contains the theoretical foundations, algorithmic framework, and experimental benchmarks for a system that replaces brittle, static thresholds with context-aware, learnable risk tolerance
-
+.
 📑 Table of Contents
 Core Motivation
 Innovation: The Anomaly Score (AS)
@@ -196,32 +196,32 @@ Communication Complexity: O(mbd+∥Ω∥logP)
 📊 Benchmarks & Performance
 The model was tested on a synthetic dataset (800 nodes, 5,957 edges, 13.88% fraud) and significantly outperformed standard GNN architectures
 .
-Full Metric Comparison
-Model
-AUC-ROC
-Avg. Precision (AP)
-F1 Score
-Precision
-Recall
-FFD-STRA-GAT
-0.9941
-0.9415
-0.9478
-0.9160
-0.9820
-GCN
-0.5432
-0.1847
-0.2483
-0.1421
-0.9820
-GraphSAGE
-0.6385
-0.2418
-0.2937
-0.1850
-0.7117
-[Sources: 19, 48]
+# Full Metric Comparison
+  Model
+  AUC-ROC
+  Avg. Precision (AP)
+  F1 Score
+  Precision
+  Recall
+  FFD-STRA-GAT
+  0.9941
+  0.9415
+  0.9478
+  0.9160
+  0.9820
+  GCN
+  0.5432
+  0.1847
+  0.2483
+  0.1421
+  0.9820
+  GraphSAGE
+  0.6385
+  0.2418
+  0.2937
+  0.1850
+  0.7117
+
 Key Visualizations
 Training Loss: FFD-STRA-GAT converged rapidly in just 73 epochs (3.58s), while GCN and GraphSAGE plateaued at much higher loss levels
 .
@@ -257,5 +257,4 @@ Validation on real-world, non-synthetic datasets
 Exploration of multi-hop propagation and richer edge feature sets
 .
 📝 Author
-Barshneyo Chakraborty 
-Date: 20.06.2026
+Barshneyo Chakraborty Date: 20.06.202
