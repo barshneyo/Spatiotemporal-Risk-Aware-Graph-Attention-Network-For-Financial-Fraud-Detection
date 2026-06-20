@@ -1,9 +1,9 @@
 FFD-STRA-GAT: Spatiotemporal Risk-Aware Graph Attention Network for Financial Fraud Detection
 FFD-STRA-GAT is an advanced spatiotemporal attentional framework designed to detect financial fraud in large-scale transaction networks
 . Unlike generic Graph Neural Networks (GNNs) that must learn fraud patterns from scratch, this model integrates domain-informed deviation-driven anomaly scoring with a learnable Graph Attention Network (GAT) extension
-.
+
 This repository contains the theoretical foundations, algorithmic framework, and experimental benchmarks for a system that replaces brittle, static thresholds with context-aware, learnable risk tolerance
-.
+
 📑 Table of Contents
 Core Motivation
 Innovation: The Anomaly Score (AS)
