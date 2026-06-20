@@ -1,135 +1,447 @@
-FFD-STRA-GAT: Spatiotemporal Risk-Aware Graph Attention Network for Financial Fraud Detection
+# FFD-STRA-GAT
 
-FFD-STRA-GAT is an advanced spatiotemporal attentional framework designed to detect financial fraud in large-scale transaction networks
-. Unlike generic Graph Neural Networks (GNNs) that must learn fraud patterns from scratch, this model integrates domain-informed deviation-driven anomaly scoring with a learnable Graph Attention Network (GAT) extension
-.This repository contains the theoretical foundations, algorithmic framework, and experimental benchmarks for a system that replaces brittle, static thresholds with context-aware, learnable risk tolerance
+## Financial Fraud Detection using Spatiotemporal Risk-Aware Graph Attention Networks
 
+**Author:** Barshneyo Chakraborty
+**Project Type:** Research-Oriented Graph Neural Network Framework for Financial Fraud Detection
 
-TABLE OF CONTENTS
-Core Motivation
-Innovation: The Anomaly Score (AS)
-Architecture Overview
-Mathematical Framework
-Algorithmic Design & Scalability
-Benchmarks & Performance
-Getting Started
-Future Work
+---
 
+# Overview
 
-CORE MOTIVATION
-Traditional fraud detection systems rely on static per-account thresholds (e.g., "flag any transfer over $10,000")
-. These are obsolete in modern finance: a legitimate high-value transfer by a corporate entity may be flagged identically to a fraudulent transfer, causing high false-positive rates
-.FFD-STRA-GAT addresses this by:
-Modeling Node Interactions: Capturing relationships between senders and receivers
-.Temporal Dynamics: Tracking evolving transaction patterns over time
-Risk-Aware Aggregation: Using max aggregation to localize fraud sources rather than diluting signals across a neighborhood
+Financial fraud detection in large-scale transaction networks requires robust modeling of:
 
-INNOVATION: The Anomaly Score (AS)
-The heart of the framework is the Unweighted Minimal Anomaly Score, which acts as a "generalized z-score"
-AS_ij(t) = (1/ϵ_ij(t))*(Δ_ij(t)*Catmis)
-​
- 
-Where:
-Δ_ij(t)(Transaction Deviation): The absolute difference between the current transaction value and the historical mean
-Catmis (Category Mismatch): A penalty applied if transaction categories between nodes do not align
-ϵ_ij(t)(Learnable Tolerance): A context-aware scale parameter that replaces the fixed standard deviation used in classical statistics
+* Node interactions (sender–receiver relationships)
+* Temporal transaction dynamics
+* Anomaly propagation across transaction graphs
 
+Traditional fraud detection systems rely heavily on static thresholds. Such approaches frequently fail because legitimate high-value transactions and fraudulent high-value transactions may appear identical when evaluated using a fixed cutoff.
 
+FFD-STRA-GAT introduces a graph-based, risk-aware, spatiotemporal framework that combines:
 
+* Graph Attention Networks (GAT)
+* Learnable anomaly scoring
+* Dynamic tolerance estimation
+* Adaptive thresholding
+* Graph-based risk propagation
 
-ARCHITECTURE OVERVIEW : 
-The model follows a 5-step end-to-end pipeline:
-Node Embedding: Transform raw features X_i into a hidden representation h_i
-Attention Scoring: Compute Ats_ij(t) using a learnable attention vector a_T and concatenated feature vectors
-Normalization: Use Softmax to determine relationship strength R_ij(t)
-Aggregation: Aggregate neighbor features into a node-level risk score ρ_i(t)
-Output Layer: Generate the final fraud probability p_i(t)
-​by comparing the weighted anomaly score AS_i(W,t) against an adaptive threshold
+to detect fraudulent behavior in transaction networks.
 
+---
 
+# Key Idea
 
-MATHEMATICAL FRAMEWORK : 
-Graph Representation
-The system models transactions as a directed graph G=(V,E). To ensure real-world scalability, it utilizes a sparse adjacency matrix, reducing complexity from O(n^2) to O(kn).
+Instead of relying on fixed transaction limits, FFD-STRA-GAT learns:
 
+* Context-aware tolerance
+* Relationship-aware risk
+* Dynamic anomaly thresholds
+* Attention-weighted transaction importance
 
+allowing fraud decisions to adapt to the surrounding transaction ecosystem.
 
+---
 
+# Graph Representation
 
-LEARNABLE TOLERANCE MODEL:
-The tolerance ϵ_ij(t) is not fixed but learned through gradient descent: 
-ϵ_ij(t) = α_ij(t)*ϵ_i + (1−α_ij(t))*ϵ_j + Ψ_ij(t)*σ_ij
-​This allows the model to adapt sensitivity based on the specific interaction between two nodes
+Let
 
+G = (V, E)
 
+where:
 
+* V = account nodes
+* E = transaction edges
 
+The transaction network is represented as a directed graph.
 
-ADAPTIVE THRESHOLDING:
-The model discards static cutoffs for a dynamic threshold Θ_i(t) based on running statistics: 
-Θ_i(t) = μ_i(t) + k_i(t)*σ_i(t) + log(∣N(i)∣)
-μ_i(t), σ_i(t) : Learnable running mean and standard deviation of anomaly scores
-k_i(t) : A learnable sensitivity parameter
+Adjacency matrix:
 
+A[i,j] ∈ {0,1}
 
+where:
 
+* 0 → no transaction
+* 1 → transaction exists
 
+A dense graph yields:
 
-ALGORITHMIC DESIGN & SCALABILITY:
-Distributed Data Parallel (DDP)
-For large graphs, FFD-STRA-GAT supports distributed training across P workers. It achieves near-linear speedup by partitioning the graph and performing boundary exchange of attention scores while synchronizing gradients via All-Reduce
+Complexity = O(n²)
 
-COMPLEXITY ANALYSIS:
-Time Complexity: O((n+m)d/P)
-Communication Complexity: O(mbd+∥Ω∥logP)
+while sparse transaction networks reduce complexity to:
 
+Complexity = O(k·n)
 
+---
 
+# Feature Representation
 
+Each transaction is represented using a 17-dimensional feature vector.
 
-BENCHMARKS & PERFORMANCE: 
-The model was tested on a synthetic dataset (800 nodes, 5,957 edges, 13.88% fraud) and significantly outperformed standard GNN architectures
+## Sender Features
 
-FULL METRIC COMPARISON
-Model                  FFD-STRA-GAT    GCN       GraphSAGE
-AUC-ROC                 0.9941        0.5432      0.6385
-Avg. Precision (AP)     0.9415        0.1847      0.2418
-F1 Score                0.9478        0.2483      0.2937
-Precision               0.9160        0.1421      0.1850
-Recall                  0.9820        0.9820      0.7117
+* Trust score
+* Account age
+* Location score
+* Average balance
+* Volatility
+* Account type
 
+## Receiver Features
 
+* Trust score
+* Account age
+* Location score
+* Average balance
+* Volatility
+* Account type
 
+## Edge Features
 
-KEY VISUALISATIONS
-Training Loss: FFD-STRA-GAT converged rapidly in just 73 epochs (3.58s), while GCN and GraphSAGE plateaued at much higher loss levels
-Score Separation: Score distribution plots show that FFD-STRA-GAT achieves nearly perfect separation between normal and fraud nodes, whereas baseline models show significant overlap
-Confusion Matrices: The model achieved 0.99 accuracy for normal nodes and 0.98 for fraud nodes
+* Transaction amount
+* Transaction deviation
+* Relationship strength
+* Dynamic tolerance
 
+Total features:
 
+17-dimensional feature vector
 
-CONFIGURATION
-Input Features: 17 features (Sender, Receiver, and Edge combined)
-Hidden Dimensions: 64
-Layers: 3
-Initialization: Xavier/Glorot for stable gradient flow
+---
 
-TRAINING
-Example initialization of the FFD-STRA-GAT parameter set : 
-                    Ω = {W, a, b, c, d, v} initialized using Xavier pattern
-                    η = learning rate
-repeat:
-    compute forward_pass(hi, Ats_ij, Rij, rho_i, AS_i, p_i)
-    compute loss L (weighted BCE + L2 regularization)
-    update Ω via backpropagation
-until convergence
+# Transaction Deviation
 
+Deviation from historical behavior is computed as
 
+Δ_ij(t) = |F_ij(t) − Tavg_ij(t)|
 
-FUTURE WORK
-Make Category Mismatch (γ) and Loss Weighting (τ,ν) fully learnable parameters
-Validation on real-world, non-synthetic datasets
-Exploration of multi-hop propagation and richer edge feature sets
+where:
 
-AUTHOR
-Barshneyo Chakraborty Date: 20.06.202
+* F_ij(t) = current transaction value
+* Tavg_ij(t) = historical average transaction value
+
+---
+
+# Running Transaction Statistics
+
+## Running Mean
+
+Tavg_ij(t+1) =
+(n_ij(t)·Tavg_ij(t) + F_ij(t+1))
+/
+(n_ij(t)+1)
+
+## Running Standard Deviation
+
+σ_ij(t)
+
+captures transaction volatility over time.
+
+---
+
+# Category Mismatch
+
+Transactions between different account categories receive higher anomaly weight.
+
+Catmis =
+
+* 1.0 if account types differ
+* γ if account types are identical
+
+Current implementation:
+
+γ = 0.5
+
+Future versions will make γ learnable.
+
+---
+
+# Relationship Strength
+
+Relationship strength between two accounts is defined as:
+
+R_ij(t) =
+n_ij(t)
+/ Σ_k n_ik(t)
+
+This measures how frequently two accounts interact relative to all outgoing interactions.
+
+---
+
+# Learnable Tolerance Model
+
+FFD-STRA-GAT replaces static tolerances with learnable tolerances:
+
+ε_ij(t) =
+α_ij(t) ε_i
++
+(1−α_ij(t)) ε_j
++
+Ψ_ij(t) σ_ij(t)
+
+where:
+
+* α_ij(t) = learnable mixing coefficient
+* Ψ_ij(t) = learnable volatility sensitivity
+* σ_ij(t) = transaction standard deviation
+
+---
+
+# Unweighted Anomaly Score
+
+AS_ij(t) =
+Δ_ij(t) · Catmis
+/
+ε_ij(t)
+
+Interpretation:
+
+* Generalized z-score
+* Scale invariant
+* Non-negative
+* Monotonically increases with deviation
+
+Unlike classical z-scores, the denominator is learnable and context-aware.
+
+---
+
+# Attention-Based Risk Aggregation
+
+Node embeddings:
+
+h_i = W X_i
+
+Attention score:
+
+Ats_ij(t) = LeakyReLU(aᵀ z_ij)
+
+where
+
+z_ij = [W X_i , W X_j , e_ij]
+
+Attention normalization:
+
+R_ij(t) =
+exp(Ats_ij(t))
+/
+Σ_k exp(Ats_ik(t))
+
+---
+
+# Learnable Weight Update
+
+w_ij(t+1) =
+w_ij(t)
+· log(1 + exp(AS_ij(t)))
+· (1 + λ_ij(t)R_ij(t))
+
+where
+
+λ_ij(t) = Softplus(cᵀ z_ij)
+
+---
+
+# Weighted Anomaly Propagation
+
+Weighted anomaly contribution:
+
+ϕ_ij(t) =
+w_ij(t) · AS_ij(t)
+
+Node aggregation:
+
+ρ_i(t) =
+log Σ_j exp(ϕ_ij(t))
+
+---
+
+# Dynamic Thresholding
+
+FFD-STRA-GAT replaces static thresholds with adaptive thresholds:
+
+Θ_i(t) =
+μ_i(t)
++
+k_i(t)σ_i(t)
++
+log(|N(i)|)
+
+where:
+
+* μ_i(t) = running mean anomaly
+* σ_i(t) = running standard deviation
+* k_i(t) = learnable sensitivity parameter
+
+---
+
+# Output Layer
+
+Fraud score:
+
+f_i(t) =
+(
+Θ_i(t)
+−
+AS_i(W,t)
+)
+/
+(
+σ_i(t)+1
+)
+
+Probability:
+
+p_i(t) = sigmoid(f_i(t))
+
+---
+
+# Loss Function
+
+Weighted Binary Cross Entropy:
+
+L =
+− Σ_i
+[
+τ y_i log(p_i)
++
+(1−y_i) log(1−p_i)
+]
++
+ν ||Ω||²
+
+where:
+
+* τ = fraud-class weighting
+* ν = L2 regularization coefficient
+
+---
+
+# Distributed Training
+
+FFD-STRA-GAT supports PyTorch Distributed Data Parallel (DDP).
+
+Training procedure:
+
+1. Graph partitioning
+2. Local forward propagation
+3. Boundary attention exchange
+4. Gradient synchronization
+5. All-reduce update
+
+---
+
+# Complexity Analysis
+
+Let:
+
+* n = number of nodes
+* m = number of edges
+* d = embedding dimension
+* P = number of workers
+
+## Time Complexity
+
+O((n+m)d / P)
+
+## Communication Complexity
+
+O(mbd + |Ω| log P)
+
+## Space Complexity
+
+O(|Ω| + (n+m)d/P)
+
+## Mini-Batch Complexity
+
+O(Bkd)
+
+where:
+
+* B = batch size
+* k = sampled neighbors
+
+---
+
+# Experimental Setup
+
+Configuration:
+
+* Device: CUDA
+* Epochs: 250
+* Hidden Dimension: 64
+* Layers: 3
+* Data Split: 60/20/20 (Stratified)
+
+Synthetic Dataset:
+
+* Nodes: 800
+* Edges: 5,957
+* Fraud Nodes: 111 (13.88%)
+
+Baselines:
+
+* GCN
+* GraphSAGE
+
+FFD-STRA-GAT converged in 73 epochs.
+
+Best threshold:
+
+0.740
+
+---
+
+# Results
+
+| Model        | AUC    | AP     | F1     | Precision | Recall | Balanced Accuracy |
+| ------------ | ------ | ------ | ------ | --------- | ------ | ----------------- |
+| FFD-STRA-GAT | 0.9941 | 0.9415 | 0.9478 | 0.9160    | 0.9820 | 0.9837            |
+| GCN          | 0.5432 | 0.1847 | 0.2483 | 0.1421    | 0.9820 | 0.5135            |
+| GraphSAGE    | 0.6425 | 0.2431 | 0.2982 | 0.1868    | 0.7387 | 0.6103            |
+
+---
+
+# Parameter Counts
+
+| Model        | Parameters |
+| ------------ | ---------- |
+| FFD-STRA-GAT | 112,431    |
+| GCN          | 9,025      |
+| GraphSAGE    | 17,793     |
+
+---
+
+# Why FFD-STRA-GAT Outperforms
+
+GCN and GraphSAGE are generic message-passing architectures that must learn fraud behavior entirely from raw graph signals.
+
+FFD-STRA-GAT incorporates:
+
+* Deviation-based anomaly scoring
+* Learnable tolerance estimation
+* Dynamic thresholds
+* Risk-aware attention
+* Anomaly propagation mechanisms
+
+This provides a strong domain-specific inductive bias for fraud detection.
+
+---
+
+# Future Work
+
+* Make γ (category mismatch) learnable
+* Make τ (loss weighting) learnable
+* Make ν (regularization coefficient) learnable
+* Validate on real-world banking datasets
+* Scale distributed training to larger worker counts
+* Introduce richer edge features
+* Explore multi-hop anomaly propagation
+
+---
+
+# Citation
+
+If you use this work, please cite:
+
+Barshneyo Chakraborty,
+"FFD-STRA-GAT: Financial Fraud Detection using Spatiotemporal Risk-Aware Graph Attention Networks"
